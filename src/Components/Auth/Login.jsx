@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -23,6 +23,19 @@ const Login = () => {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = localStorage.getItem('token');
+
+    if (user && token) {
+      if (user.role === 'ADMIN') {
+        navigate('/admindashboard', { replace: true });
+      } else if (user.role === 'EMPLOYEE') {
+        navigate('/employeedashboard', { replace: true });
+      }
+    }
+  }, []);
   
   const {
     register,
