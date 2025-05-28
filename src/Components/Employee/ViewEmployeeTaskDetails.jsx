@@ -256,6 +256,7 @@ const ViewTaskDetails = () => {
             </Snackbar>
         </div>
     );
+
 };
 
 export default ViewTaskDetails;

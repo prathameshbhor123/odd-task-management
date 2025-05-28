@@ -703,6 +703,7 @@ const ViewTaskDetails = () => {
             )}
         </div>
     );
+
 };
 
 export default ViewTaskDetails;
