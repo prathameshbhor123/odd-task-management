@@ -49,7 +49,7 @@ const EmployeeDashboard = () => {
     const updateTaskStatus = async (taskId, status) => {
         try {
             console.log(`Updating task ${taskId} status to ${status}`);
-            const response = await axios.put(`${API_BASE_URL}/task/${taskId}/{status}`,
+            const response = await axios.put(`${API_BASE_URL}/task/${taskId}/${status}`,
                 { status },
                 {
                     headers: {

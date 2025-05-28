@@ -11,6 +11,9 @@ const ViewTaskDetails = () => {
 
     const { id } = useParams();
     const taskId = id;
+    const userString = localStorage.getItem('user');
+    const user = userString ? JSON.parse(userString) : null;
+    const userId = user?.id;
 
     const { register, handleSubmit, reset, formState: { errors } } = useForm();
     const [taskData, setTaskData] = useState(null);
@@ -56,17 +59,18 @@ const ViewTaskDetails = () => {
 
     const publishComment = async (data) => {
         try {
-            console.log('Publishing comment:', data);
-            const response = await axios.post(`${API_BASE_URL}/task/comment}`, {
-                taskId: id,
-                content: data.content,
-                postedName: 'Current User' // Replace with actual username if available
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                }
+            const content = data.content; // ✅ Make sure this is just a plain string
+            console.log('Publishing comment:', content);
+
+            const url = ` ${API_BASE_URL}/task/comment?taskId=${taskId}&postedBy=${userId}`;
+            console.log('Posting comment to:', url);
+
+            const response = await axios.post(url, content, {
+                headers: { 'Content-Type': 'text/plain' }
             });
+
+            console.log('Comment posted:', response.data);
+
 
             if (response.data.id) {
                 showSnackbar('Comment published successfully', 'success');
@@ -80,6 +84,8 @@ const ViewTaskDetails = () => {
             showSnackbar(error.response?.data?.message || 'Failed to publish comment', 'error');
         }
     };
+
+
 
     const showSnackbar = (message, severity) => {
         setSnackbar({ open: true, message, severity });
