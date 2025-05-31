@@ -896,6 +896,7 @@ const Navbar = () => {
     StorageService.signout();
     setIsAdminLoggedIn(false);
     setIsEmployeeLoggedIn(false);
+    localStorage.removeItem('welcomePopupShown');
     navigate('/loginpage');
   };
 

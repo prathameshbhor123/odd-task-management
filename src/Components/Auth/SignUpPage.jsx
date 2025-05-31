@@ -1,156 +1,198 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import {
+  TextField,
+  Button,
+  IconButton,
+  InputAdornment,
+  Snackbar,
+  Alert,
+  Card,
+  CardContent,
+  CardActions
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "axios";
-import axiosInstance from "../axiosInstance";
 
 export default function SignUp() {
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors, touchedFields },
+    formState: { errors },
   } = useForm();
   const navigate = useNavigate();
 
-  const [hidePassword, setHidePassword] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const password = watch("password");
   const confirmPassword = watch("confirmPassword");
 
   const togglePasswordVisibility = () => {
-    setHidePassword(!hidePassword);
+    setShowPassword(!showPassword);
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   const onSubmit = async (data) => {
     if (data.password !== data.confirmPassword) {
-      alert("Passwords do not match!");
+      setIsError(true);
+      setSnackbarMessage("Passwords do not match!");
+      setOpenSnackbar(true);
       return;
     }
 
     try {
-      const res = await axios.post("/api/auth/signup", data); // Update the API route as needed
+      setIsLoading(true);
+      const res = await axios.post("/api/auth/signup", data);
       if (res.data.id) {
-        alert("Signup successful");
-        navigate("/loginpage");
+        setIsError(false);
+        setSnackbarMessage("Signup successful! Redirecting to login...");
+        setOpenSnackbar(true);
+        setTimeout(() => navigate("/loginpage"), 2000);
       } else {
-        alert("Signup failed");
+        throw new Error("Signup failed");
       }
     } catch (error) {
-      alert("Error during signup");
+      setIsError(true);
+      setSnackbarMessage(error.response?.data?.message || "Error during signup");
+      setOpenSnackbar(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div
-      className="flex justify-center items-center min-h-screen bg-cover bg-center p-4"
-      style={{
-        backgroundImage:
-          'url("https://blogimage.vantagecircle.com/content/images/2019/10/employee-grievances.png")',
-      }}
-    >
-      <div className="w-full max-w-md bg-purple-100 p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-semibold text-center mb-6">Sign Up</h2>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col space-y-4"
-        >
-          <div>
-            <input
-              type="text"
-              placeholder="Name"
-              {...register("name", { required: true })}
-              className="w-full p-2 border rounded outline-none"
-            />
-            {errors.name && touchedFields.name && (
-              <p className="text-red-500 text-sm mt-1">
-                Please enter a valid name.
-              </p>
-            )}
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-yellow-100 to-pink-100">
+      <div className="flex flex-col md:flex-row bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full mt-20">
+        {/* Left side - Signup form */}
+        <div className="w-full md:w-1/2 p-10">
+          <h2 className="text-3xl font-bold mb-2">Create Account</h2>
+          <p className="text-gray-600 mb-6">Sign up to get started</p>
 
-          <div>
-            <input
-              type="email"
-              placeholder="Email"
-              {...register("email", {
-                required: true,
-                pattern: /^\S+@\S+\.\S+$/,
-              })}
-              className="w-full p-2 border rounded outline-none"
-            />
-            {errors.email && touchedFields.email && (
-              <p className="text-red-500 text-sm mt-1">
-                Please enter a valid email.
-              </p>
-            )}
-          </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="mt-2">
+              <TextField
 
-          {/* Uncomment this block if needed */}
-          {/* <div>
-            <input
-              type="text"
-              placeholder="Mobile Number"
-              {...register("mobileNumber", {
-                required: true,
-                pattern: /^((\+91-?)|0)?[0-9]{10}$/
-              })}
-              className="w-full p-2 border rounded outline-none"
-            />
-            {errors.mobileNumber && touchedFields.mobileNumber && (
-              <p className="text-red-500 text-sm mt-1">Please enter a valid mobile number.</p>
-            )}
-          </div> */}
+                label="Name"
+                variant="outlined"
+                fullWidth
+                InputProps={{ sx: { backgroundColor: 'white' } }}
+                {...register("name", { required: "Name is required" })}
+                error={!!errors.name}
+                helperText={errors.name?.message}
+              />
+            </div>
+            <div className="mt-2">
+              <TextField
 
-          <div className="relative">
-            <input
-              type={hidePassword ? "password" : "text"}
-              placeholder="Password"
-              {...register("password", { required: true })}
-              className="w-full p-2 border rounded outline-none pr-10"
-            />
-            <button
-              type="button"
-              onClick={togglePasswordVisibility}
-              className="absolute right-2 top-2 text-sm"
+                label="Email"
+                variant="outlined"
+                fullWidth
+                InputProps={{ sx: { backgroundColor: 'white' } }}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address"
+                  }
+                })}
+                error={!!errors.email}
+                helperText={errors.email?.message}
+              />
+            </div>
+            <div className="mt-2">
+              <TextField
+                label="Password"
+                variant="outlined"
+                fullWidth
+                type={showPassword ? "text" : "password"}
+                InputProps={{
+                  sx: { backgroundColor: 'white' },
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={togglePasswordVisibility} edge="end">
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters"
+                  }
+                })}
+                error={!!errors.password}
+                helperText={errors.password?.message}
+              />
+            </div>
+            <div className="mt-2">
+              <TextField
+                label="Confirm Password"
+                variant="outlined"
+                fullWidth
+                type={showPassword ? "text" : "password"}
+                InputProps={{
+                  sx: { backgroundColor: 'white' },
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={togglePasswordVisibility} edge="end">
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+                {...register("confirmPassword", {
+                  required: "Please confirm your password",
+                  validate: value =>
+                    value === password || "Passwords do not match"
+                })}
+                error={!!errors.confirmPassword}
+                helperText={errors.confirmPassword?.message}
+              />
+            </div>
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+
+              sx={{ backgroundColor: '#dc2626', '&:hover': { backgroundColor: '#b91c1c' } }}
+              disabled={isLoading}
             >
-              {hidePassword ? "👁️‍🗨️" : "👁️"}
-            </button>
-            {errors.password && touchedFields.password && (
-              <p className="text-red-500 text-sm mt-1">
-                Please enter a valid password.
-              </p>
-            )}
-          </div>
+              {isLoading ? 'Creating account...' : 'Sign Up'}
+            </Button>
 
-          <div className="relative">
-            <input
-              type={hidePassword ? "password" : "text"}
-              placeholder="Confirm Password"
-              {...register("confirmPassword", { required: true })}
-              className="w-full p-2 border rounded outline-none pr-10"
-            />
-            <button
-              type="button"
-              onClick={togglePasswordVisibility}
-              className="absolute right-2 top-2 text-sm"
-            >
-              {hidePassword ? "👁️‍🗨️" : "👁️"}
-            </button>
-            {errors.confirmPassword && touchedFields.confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">
-                Please confirm your password.
-              </p>
-            )}
-          </div>
 
-          <button
-            type="submit"
-            className="w-full bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 transition"
-          >
-            Sign Up
-          </button>
-        </form>
+          </form>
+
+
+        </div>
+
+        {/* Right side - Branding */}
+        <div className="hidden md:flex w-full md:w-1/2 bg-gradient-to-br from-black via-red-600 to-orange-500 text-white items-center justify-center p-10">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold mb-2">OddTech</h2>
+            <h3 className="text-3xl font-semibold mb-4">Solutions</h3>
+            <p className="text-lg font-semibold mb-2">Build. Track. Achieve.</p>
+            <p className="text-sm">Empowering your work with speed and clarity.</p>
+          </div>
+        </div>
       </div>
+
+      <Snackbar open={openSnackbar} autoHideDuration={5000} onClose={handleCloseSnackbar}>
+        <Alert onClose={handleCloseSnackbar} severity={isError ? "error" : "success"} sx={{ width: "100%" }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

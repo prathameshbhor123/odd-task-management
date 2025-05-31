@@ -26,6 +26,7 @@ return (
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/aboutus" element={<AboutUsPage />} />
         <Route path="/contactus" element={<ContactUsPage />} />
+        <Route path="/home" element={<HomePage/>} />
 
 
         {/* Admin Routes */}
