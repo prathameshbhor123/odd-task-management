@@ -909,7 +909,7 @@ const Navbar = () => {
 
   const adminLinks = [
     { name: 'Dashboard', path: '/admindashboard' },
-    { name: 'Post Task', path: '/posttask' },
+    { name: 'Assign Task', path: '/posttask' },
     { name: 'Register', path: '/signup' },
 
   ];

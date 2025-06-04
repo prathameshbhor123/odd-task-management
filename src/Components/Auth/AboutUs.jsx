@@ -157,12 +157,7 @@ const AboutUs = () => {
                             </div>
                         </div>
 
-                        {/* Error Message */}
-                        {error && (
-                            <div className="mt-6 p-3 bg-red-100 text-red-700 rounded">
-                                {error}
-                            </div>
-                        )}
+
                     </div>
                 </div>
             </div>
