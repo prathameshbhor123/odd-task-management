@@ -16,6 +16,9 @@ import EmployeeDashboardPage from './Pages/EmployeePages/EmployeeDashboardPage'
 import ProtectedRoute from './Components/ProtectedRout'
 import ShowComplaintsPage from './Pages/AdminPages/ShowComplaintsPage'
 import UpdateTaskPage from './Pages/AdminPages/UpdateTaskPage'
+import AttendenceCapturePage from './Pages/FaceRecognitionPages/AttendenceCapturePage'
+import FaceLoginPage from './Pages/FaceRecognitionPages/FaceLoginPage'
+import AttendancePages from './Pages/AdminPages/AttendancePages'
 function App() {
  
 return (
@@ -27,6 +30,7 @@ return (
         <Route path="/aboutus" element={<AboutUsPage />} />
         <Route path="/contactus" element={<ContactUsPage />} />
         <Route path="/home" element={<HomePage/>} />
+        <Route path="/facelogin" element={<FaceLoginPage />} />
 
 
         {/* Admin Routes */}
@@ -51,6 +55,11 @@ return (
           element={<ProtectedRoute element={ViewTaskDetailsPage} allowedRoles={['ADMIN']} />}
         />
 
+        <Route
+          path="/attendance"
+          element={<ProtectedRoute element={AttendancePages} allowedRoles={['ADMIN']} />}
+        />
+
         {/* Employee Routes */}
         <Route
           path="/employeedashboard"
@@ -59,6 +68,10 @@ return (
         <Route
           path="/viewemployeetaskdetails/:id"
           element={<ProtectedRoute element={ViewEmployeeTaskDetailsPage} allowedRoles={['EMPLOYEE']} />}
+        />
+        <Route
+        path="/face"
+        element={<ProtectedRoute element={AttendenceCapturePage} allowedRoles={['EMPLOYEE']}/>}
         />
       </Routes>
     </>

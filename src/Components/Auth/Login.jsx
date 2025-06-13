@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from 'axios';
+import FaceLogin from '../FaceRecognition/FaceLogin'; // Adjust the import path as necessary
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,6 +23,10 @@ const Login = () => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showFaceLogin, setShowFaceLogin] = useState(false);
+  const [loggedUser, setLoggedUser] = useState(null);
+
+
   const navigate = useNavigate();
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -60,7 +65,7 @@ const Login = () => {
     try {
       setIsLoading(true);
       // Replace this URL with your actual API endpoint
-      const response = await axios.post('/api/auth/login', credentials);
+      const response = await axios.post('http://localhost:8080/api/auth/login', credentials);
 
       return response.data;
     } catch (error) {
@@ -85,16 +90,22 @@ const Login = () => {
       const response = await loginUser(data);
 
       if (response.userId) {
-        localStorage.setItem('user', JSON.stringify({
+        const userObj = {
           id: response.userId,
-          role: response.userRole
-        }));
-        localStorage.setItem('token', response.jwt);
+          role: response.userRole,
+          jwt: response.jwt,
+          email: data.email // Capture email here to forward to face login if needed
+        };
 
         if (response.userRole === 'ADMIN') {
+          // Admins skip face recognition
+          localStorage.setItem('user', JSON.stringify({ id: userObj.id, role: userObj.role }));
+          localStorage.setItem('token', userObj.jwt);
           navigate('/admindashboard');
         } else if (response.userRole === 'EMPLOYEE') {
-          navigate('/employeedashboard');
+          // Employees go through face login
+          setLoggedUser(userObj);
+          setShowFaceLogin(true);
         }
       } else {
         setIsError(true);
@@ -107,6 +118,7 @@ const Login = () => {
       setOpenSnackbar(true);
     }
   };
+
 
 
 
@@ -174,7 +186,7 @@ const Login = () => {
               sx={{ backgroundColor: '#dc2626', '&:hover': { backgroundColor: '#b91c1c' } }}
               disabled={isLoading}
             >
-              {isLoading ? 'Logging in...' : <><span role="img" aria-label="lock">🔒</span> Login</>}
+              {isLoading ? 'Logging in...' : <><span role="img" aria-label="lock"></span> Verify with Face</>}
             </Button>
 
             <div className="text-center text-gray-400">or continue with</div>
@@ -202,13 +214,32 @@ const Login = () => {
 
         {/* Right side - Branding */}
         <div className="hidden md:flex w-full md:w-1/2 bg-gradient-to-br from-black via-red-600 to-orange-500 text-white items-center justify-center p-10">
-          <div className="text-center">
-            <h2 className="text-4xl font-bold mb-2">OddTech</h2>
-            <h3 className="text-3xl font-semibold mb-4">Solutions</h3>
-            <p className="text-lg font-semibold mb-2">Build. Track. Achieve.</p>
-            <p className="text-sm">Empowering your work with speed and clarity.</p>
-          </div>
+          {showFaceLogin && loggedUser?.role === 'EMPLOYEE' ? (
+            <FaceLogin
+              user={loggedUser}
+              onSuccess={() => {
+                // Save user and token after successful face match
+                localStorage.setItem('user', JSON.stringify({ id: loggedUser.id, role: loggedUser.role }));
+                localStorage.setItem('token', loggedUser.jwt);
+                navigate('/employeedashboard');
+              }}
+              onFailure={() => {
+                setIsError(true);
+                setSnackbarMessage('Face not recognized');
+                setOpenSnackbar(true);
+                setShowFaceLogin(false);
+              }}
+            />
+          ) : (
+            <div className="text-center">
+              <h2 className="text-4xl font-bold mb-2">OddTech</h2>
+              <h3 className="text-3xl font-semibold mb-4">Solutions</h3>
+              <p className="text-lg font-semibold mb-2">Build. Track. Achieve.</p>
+              <p className="text-sm">Empowering your work with speed and clarity.</p>
+            </div>
+          )}
         </div>
+
       </div>
 
       <Snackbar open={openSnackbar} autoHideDuration={5000} onClose={handleCloseSnackbar}>

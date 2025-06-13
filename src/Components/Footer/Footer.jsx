@@ -15,7 +15,7 @@ const Footer = () => {
 
   return (
     <footer
-      className={`bg-black text-gray-300 py-8 px-6 sm:px-20 transition-all duration-700 ease-out transform ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      className={`bg-gray-800 text-gray-300 py-8 px-6 sm:px-20 transition-all duration-700 ease-out transform ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
         }`}
     >
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start gap-8 sm:gap-0">

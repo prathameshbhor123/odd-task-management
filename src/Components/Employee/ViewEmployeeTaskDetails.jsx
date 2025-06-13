@@ -135,7 +135,7 @@ const ViewTaskDetails = () => {
             <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6 mt-20">
                 <div className="p-6">
                     <h2 className="text-2xl font-bold text-blue-600 mb-3">{taskData.title}</h2>
-                    <p className="text-gray-700 mb-4">{taskData.description}</p>
+                    <p className="text-gray-700 mb-4 ">{taskData.description}</p>
 
                     <div className="border-t border-gray-200 my-4"></div>
 

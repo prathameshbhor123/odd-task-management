@@ -7,10 +7,7 @@ import {
   IconButton,
   InputAdornment,
   Snackbar,
-  Alert,
-  Card,
-  CardContent,
-  CardActions
+  Alert
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "axios";
@@ -20,18 +17,18 @@ export default function SignUp() {
     register,
     handleSubmit,
     watch,
-    formState: { errors },
+    formState: { errors }
   } = useForm();
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const password = watch("password");
-  const confirmPassword = watch("confirmPassword");
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -49,10 +46,29 @@ export default function SignUp() {
       return;
     }
 
+    if (!selectedFile) {
+      setIsError(true);
+      setSnackbarMessage("Please upload a face image.");
+      setOpenSnackbar(true);
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const res = await axios.post("/api/auth/signup", data);
-      if (res.data.id) {
+
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("email", data.email);
+      formData.append("password", data.password);
+      formData.append("faceImage", selectedFile);
+
+      const res = await axios.post("http://localhost:8080/api/auth/signup", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+
+      if (res.data?.id) {
         setIsError(false);
         setSnackbarMessage("Signup successful! Redirecting to login...");
         setOpenSnackbar(true);
@@ -62,7 +78,9 @@ export default function SignUp() {
       }
     } catch (error) {
       setIsError(true);
-      setSnackbarMessage(error.response?.data?.message || "Error during signup");
+      setSnackbarMessage(
+        error.response?.data || "Something went wrong during signup."
+      );
       setOpenSnackbar(true);
     } finally {
       setIsLoading(false);
@@ -72,31 +90,30 @@ export default function SignUp() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-yellow-100 to-pink-100">
       <div className="flex flex-col md:flex-row bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full mt-20">
-        {/* Left side - Signup form */}
         <div className="w-full md:w-1/2 p-10">
           <h2 className="text-3xl font-bold mb-2">Create Account</h2>
           <p className="text-gray-600 mb-6">Sign up to get started</p>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="mt-2">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-10 ">
+            <div className="mb-3">
               <TextField
-
                 label="Name"
                 variant="outlined"
+
                 fullWidth
-                InputProps={{ sx: { backgroundColor: 'white' } }}
+                InputProps={{ sx: { backgroundColor: "white" } }}
                 {...register("name", { required: "Name is required" })}
                 error={!!errors.name}
                 helperText={errors.name?.message}
               />
             </div>
-            <div className="mt-2">
+            <div className="mb-3">
               <TextField
-
                 label="Email"
                 variant="outlined"
                 fullWidth
-                InputProps={{ sx: { backgroundColor: 'white' } }}
+
+                InputProps={{ sx: { backgroundColor: "white" } }}
                 {...register("email", {
                   required: "Email is required",
                   pattern: {
@@ -108,17 +125,20 @@ export default function SignUp() {
                 helperText={errors.email?.message}
               />
             </div>
-            <div className="mt-2">
+            <div className="mb-3">
               <TextField
                 label="Password"
                 variant="outlined"
                 fullWidth
                 type={showPassword ? "text" : "password"}
                 InputProps={{
-                  sx: { backgroundColor: 'white' },
+                  sx: { backgroundColor: "white" },
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={togglePasswordVisibility} edge="end">
+                      <IconButton
+                        onClick={togglePasswordVisibility}
+                        edge="end"
+                      >
                         {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
@@ -135,17 +155,20 @@ export default function SignUp() {
                 helperText={errors.password?.message}
               />
             </div>
-            <div className="mt-2">
+            <div className="mb-3">
               <TextField
                 label="Confirm Password"
                 variant="outlined"
                 fullWidth
                 type={showPassword ? "text" : "password"}
                 InputProps={{
-                  sx: { backgroundColor: 'white' },
+                  sx: { backgroundColor: "white" },
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={togglePasswordVisibility} edge="end">
+                      <IconButton
+                        onClick={togglePasswordVisibility}
+                        edge="end"
+                      >
                         {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
@@ -153,28 +176,37 @@ export default function SignUp() {
                 }}
                 {...register("confirmPassword", {
                   required: "Please confirm your password",
-                  validate: value =>
+                  validate: (value) =>
                     value === password || "Passwords do not match"
                 })}
                 error={!!errors.confirmPassword}
                 helperText={errors.confirmPassword?.message}
               />
             </div>
+            <div className="mb-3">
+              {/* Image Upload */}
+              <TextField
+                type="file"
+                fullWidth
+
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ accept: "image/*" }}
+                onChange={(e) => setSelectedFile(e.target.files[0])}
+              />
+            </div>
             <Button
               type="submit"
               variant="contained"
               fullWidth
-
-              sx={{ backgroundColor: '#dc2626', '&:hover': { backgroundColor: '#b91c1c' } }}
+              sx={{
+                backgroundColor: "#dc2626",
+                "&:hover": { backgroundColor: "#b91c1c" }
+              }}
               disabled={isLoading}
             >
-              {isLoading ? 'Creating account...' : 'Sign Up'}
+              {isLoading ? "Creating account..." : "Sign Up"}
             </Button>
-
-
           </form>
-
-
         </div>
 
         {/* Right side - Branding */}
@@ -188,8 +220,16 @@ export default function SignUp() {
         </div>
       </div>
 
-      <Snackbar open={openSnackbar} autoHideDuration={5000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity={isError ? "error" : "success"} sx={{ width: "100%" }}>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={5000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={isError ? "error" : "success"}
+          sx={{ width: "100%" }}
+        >
           {snackbarMessage}
         </Alert>
       </Snackbar>

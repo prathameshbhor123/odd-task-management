@@ -925,7 +925,8 @@ const Navbar = () => {
   };
 
   return (
-    <header className="shadow-md fixed top-0 left-0 w-full bg-white z-50">
+
+    <header className="fixed top-0 left-0 w-full z-50 shadow-md bg-gray-800">
       <div className="max-w-full mx-auto px-6 sm:px-8 lg:px-10 py-4 flex justify-between items-center">
         <motion.div
           initial={{ opacity: 0, x: -50 }}
@@ -943,12 +944,13 @@ const Navbar = () => {
           </Link>
         </motion.div>
 
+        {/* Desktop Nav */}
         <nav className="hidden md:flex space-x-6 items-center">
           {renderLinks().map((link) => (
             <Link
               key={link.name}
               to={link.path}
-              className="text-gray-700 hover:text-blue-600 transition-colors duration-300"
+              className="text-white font-medium hover:text-gray-300 border-b-2 border-transparent hover:border-gray-300 transition-all duration-300"
             >
               {link.name}
             </Link>
@@ -963,25 +965,27 @@ const Navbar = () => {
           )}
         </nav>
 
+        {/* Mobile Menu Button */}
         <div className="md:hidden">
           <button onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
+            {isOpen ? <X size={24} color="white" /> : <Menu size={24} color="white" />}
           </button>
         </div>
       </div>
 
+      {/* Mobile Nav */}
       {isOpen && (
         <motion.nav
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: 'auto', opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
-          className="md:hidden bg-white px-6 pb-4 space-y-3 shadow"
+          className="md:hidden bg-[#2c2c2c] px-6 pb-4 space-y-3 shadow"
         >
           {renderLinks().map((link) => (
             <Link
               key={link.name}
               to={link.path}
-              className="block text-gray-700 hover:text-blue-600 transition-colors duration-300"
+              className="block text-white font-medium hover:text-gray-300 border-b border-transparent hover:border-gray-300 transition-colors duration-300"
               onClick={() => setIsOpen(false)}
             >
               {link.name}
@@ -1001,6 +1005,7 @@ const Navbar = () => {
         </motion.nav>
       )}
     </header>
+
   );
 };
 
